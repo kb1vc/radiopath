@@ -126,7 +126,7 @@ func (fr LatLon) Bearing(to LatLon) (float64, float64, float64) {
 	return az, revaz, dist
 }
 
-func (fr LatLon) Onpath(az float64, dist float64) LatLon {
+func (fr LatLon) OnPath(az float64, dist float64) LatLon {
 
 	const eps = 5e-14;
 	const a = 6378206.4; /* (meters) */
