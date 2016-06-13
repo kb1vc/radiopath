@@ -68,17 +68,17 @@ const pi2 = (2.0 * math.Pi)
 
 // return (bearing, reverse bearing, distance) in degrees and km respectively
 func (fr LatLon) Bearing(to LatLon) (float64, float64, float64) {
-	if (math.Abs(fr.lat - to.lat) < 1.0e-10) &&
-		(math.Abs(fr.lon - to.lon) < 1.0e-10) {
+	if (math.Abs(fr.Lat - to.Lat) < 1.0e-10) &&
+		(math.Abs(fr.Lon - to.Lon) < 1.0e-10) {
 		return 0.0, 0.0, 0.0
 	}
 
 	boa := clarkeBL / clarkeAL
 	f := 1.0 - boa
-	p1r := fr.lat * deg2rad
-	p2r := to.lat * deg2rad
-	l1r := fr.lon * deg2rad
-	l2r := to.lon * deg2rad
+	p1r := fr.Lat * deg2rad
+	p2r := to.Lat * deg2rad
+	l1r := fr.Lon * deg2rad
+	l2r := to.Lon * deg2rad
 	
 	dlr := l1r - l2r
 
@@ -189,8 +189,8 @@ func (fr LatLon) OnPath(az float64, dist float64) LatLon {
 	s = dist * 1000.0
 	faz = az * math.Pi / 180.0
 
-	glat1 = fr.lat * math.Pi / 180.0
-	glon1 = fr.lon * math.Pi / 180.0 
+	glat1 = fr.Lat * math.Pi / 180.0
+	glon1 = fr.Lon * math.Pi / 180.0 
 	
 	
 	r = 1.0 - f
@@ -244,8 +244,8 @@ func (fr LatLon) OnPath(az float64, dist float64) LatLon {
 
 	var ret LatLon
 	
-	ret.lat = glat2 * 180.0 / math.Pi
-	ret.lon = glon2 * 180.0 / math.Pi 
+	ret.Lat = glat2 * 180.0 / math.Pi
+	ret.Lon = glon2 * 180.0 / math.Pi 
 
 	
 	return ret 

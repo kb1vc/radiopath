@@ -57,12 +57,12 @@ func FromGrid(gs string) (LatLon, error) {
 		return ret, er
 	}
 
-	ret.lon = 20.0 * float64(gs[0] - 'A') - 180.0
-	ret.lat = 10.0 * float64(gs[1] - 'A') - 90.0
+	ret.Lon = 20.0 * float64(gs[0] - 'A') - 180.0
+	ret.Lat = 10.0 * float64(gs[1] - 'A') - 90.0
 
 	if len(gs) < 4 {
-		ret.lon += 10.0;
-		ret.lat += 5.0;
+		ret.Lon += 10.0;
+		ret.Lat += 5.0;
 		return ret, nil
 	}
 
@@ -71,12 +71,12 @@ func FromGrid(gs string) (LatLon, error) {
 	}
 
 
-	ret.lon += 2.0 * float64(gs[2] - '0')
-	ret.lat += 1.0 * float64(gs[3] - '0')
+	ret.Lon += 2.0 * float64(gs[2] - '0')
+	ret.Lat += 1.0 * float64(gs[3] - '0')
 
 	if len(gs) < 6 {
-		ret.lon += 1.0
-		ret.lat += 0.5
+		ret.Lon += 1.0
+		ret.Lat += 0.5
 		return ret, nil
 	}
 		
@@ -85,12 +85,12 @@ func FromGrid(gs string) (LatLon, error) {
 	}
 
 
-	ret.lon += (2.0/24.0) * float64(gs[4] - 'A')
-	ret.lat += (1.0/24.0) * float64(gs[5] - 'A')
+	ret.Lon += (2.0/24.0) * float64(gs[4] - 'A')
+	ret.Lat += (1.0/24.0) * float64(gs[5] - 'A')
 
 	if len(gs) < 8 {
-		ret.lon += (1.0 / 24.0)
-		ret.lat += (0.5 / 24.0)
+		ret.Lon += (1.0 / 24.0)
+		ret.Lat += (0.5 / 24.0)
 		return ret, nil
 	}
 
@@ -98,8 +98,8 @@ func FromGrid(gs string) (LatLon, error) {
 		return ret, er
 	}
 
-	ret.lon += (0.2 / 24.0) * (float64(gs[6] - '0') + 0.5)
-	ret.lat += (0.1 / 24.0) * (float64(gs[7] - '0') + 0.5)
+	ret.Lon += (0.2 / 24.0) * (float64(gs[6] - '0') + 0.5)
+	ret.Lat += (0.1 / 24.0) * (float64(gs[7] - '0') + 0.5)
 
 	
 	return ret, nil
@@ -109,19 +109,19 @@ func ToGrid(ll LatLon) (string, error) {
 	var ret string
 	ret = "      "
 
-	if (ll.lon < -180.0) || (ll.lon > 180.0) || 
-		(ll.lat < -90.0) || (ll.lat > 90.0) {
-		erstr := fmt.Sprintf("Lat/Lon coordinate is out of range %f lat %f lon", ll.lat, ll.lon)
+	if (ll.Lon < -180.0) || (ll.Lon > 180.0) || 
+		(ll.Lat < -90.0) || (ll.Lat > 90.0) {
+		erstr := fmt.Sprintf("Lat/Lon coordinate is out of range %f lat %f lon", ll.Lat, ll.Lon)
 		return ret, errors.New(erstr)
 	}
 
 	// find the lon chars. 
-	lon := ll.lon + 180
+	lon := ll.Lon + 180
 	offset := math.Floor(lon / 20.0)
 	lon = lon - 20.0 * offset
 	ret += string('A' + int(offset))
 
-	lat := ll.lat + 90.0
+	lat := ll.Lat + 90.0
 	offset = math.Floor(lat / 10.0)
 	lat = lat - 10.0 * offset
 	ret += string('A' + int(offset))

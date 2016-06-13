@@ -31,8 +31,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package location
 
 type LatLon struct {
-	lat float64
-	lon float64
+	Lat float64
+	Lon float64
 }
 
 const Almost_pi = 3.14159
