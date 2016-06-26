@@ -3,7 +3,7 @@ package nedmap
 
 
 import (
-	"os"
+	"io"
 	"encoding/xml"
 	"io/ioutil"
 	"github.com/kb1vc/radiopath/location"
@@ -55,11 +55,8 @@ type rastinfo_x struct {
 	Colcount int `xml:"colcount"`
 }
 
-func GetInfo(mdFileName string) (MapInfo, error) {
-	infd, err := os.Open(mdFileName)
-	defer infd.Close()
-	if err != nil { panic(err) }
-	xmlContent, err := ioutil.ReadAll(infd)
+func GetInfo(instr io.Reader) (MapInfo, error) {
+	xmlContent, err := ioutil.ReadAll(instr)
 	if err != nil { panic(err) }
 
 	md := metadata_x{}
