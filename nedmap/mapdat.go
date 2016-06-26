@@ -56,6 +56,7 @@ package nedmap
 import (
 	"io"
 	"os"
+	"time"
 	"errors"
 	"encoding/binary"
 	"compress/gzip"
@@ -79,6 +80,54 @@ const startOfLineMarker int16 = 0x7fff
 const startOfFileMarker int16 = 0x7ffe
 const escMarker byte = 0x8
 const currentFileVersion int16 = 0x0100
+
+// convert a USGS NED map into a delta-compressed format
+// metafile is the filename of an XML file describing the input data set
+// fltfile is the filename of a binary file containing an array of float32 elevations
+// The output filename will be [NS]%2d[EW]%3d.dgz or 
+func ConvertFile(metafile, fltfile string) (*MapData, string, error) {
+	// open the metadata file
+	mdfd, mderr := os.Open(metafile)
+	if mderr != nil { return nil, "", mderr }
+	defer mdfd.Close()
+
+	// build the metadata
+	md, mdperr := GetInfo(mdfd)
+	if mdperr != nil { return nil, "", mdperr }
+
+	
+	// open the raw USGS NED elevation file
+	dfd, derr := os.Open(fltfile)
+	if derr != nil { return nil, "", derr }
+	defer dfd.Close()
+
+	floatStart := time.Now()
+	// now	create the elevation array
+	elev, eerr := GetFloatMap(dfd, md)
+	if eerr != nil { return nil, "", eerr }
+	floatElapsed := time.Since(floatStart)
+
+	fmt.Printf("Raw Float readtime: %s\n", floatElapsed)
+
+	// Now write the compressed map file.
+	// create the filename
+	latmk := 'N'
+	lonmk := 'E'
+	urlat := int(round(float32(md.ur.Lat)))
+	lllon := int(round(float32(md.ll.Lon)))
+		
+	if urlat < 0 {
+		latmk = 'S'
+		urlat = - urlat
+	}
+	if lllon < 0 {
+		lonmk = 'W'
+		lllon = - lllon
+	}
+	cmpfile := fmt.Sprintf("%c%02d%c%03d.dgz", latmk, urlat, lonmk, lllon)
+	return elev, cmpfile, elev.WriteZCompressedMap(cmpfile)
+}
+
 
 // Read a raw USGS input stream, given the metadata that defines its shape.
 // In this case, the metadata probably came from an XML specification file.
@@ -107,7 +156,7 @@ func (m * MapData) WriteFloatMap(outstr io.Writer) (error) {
 	return nil
 }
 
-const inbufSize int = 1024
+const inbufSize int = (32*1024)
 
 type nybbleOutStream struct {
 	wr io.Writer
@@ -406,8 +455,6 @@ func ReadCompressedMap(instr io.Reader) (* MapData, error) {
 
 	ns.readCompHeader(&m.MD)
 
-	fmt.Println(m.MD)
-
 	m.Elevation = make([][]float32, m.MD.rows)
 
 	for i := range m.Elevation {
@@ -424,8 +471,6 @@ func ReadCompressedMap(instr io.Reader) (* MapData, error) {
 			last_el = el
 		}
 	}
-	
-	fmt.Printf("el[0][0] = %f\n", m.Elevation[0][0])
 	
 	return m, nil	
 }
