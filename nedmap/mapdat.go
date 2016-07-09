@@ -263,7 +263,9 @@ func (w * nybbleInStream) getInt16() (r int16) {
 }
 
 func (w * nybbleInStream) getFloat32() (r float32) {
-	buf := make([]byte, 4)
+	// buf := make([]byte, 4)
+	var bufA [4]byte
+	buf := bufA[:]
 	w.getBytes(buf)	
 	bb := bytes.NewBuffer(buf)
 	binary.Read(bb, binary.LittleEndian, &r)
@@ -399,20 +401,13 @@ func (m * MapData) WriteCompressedMap(outstr io.Writer) (error) {
 	return nil
 }
 
+var cvtFloatTable = [...]float32 { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 0.0, -7.0, -6.0, -5.0, -4.0, -3.0, -2.0, -1.0 }
+
 func (w * nybbleInStream) readCompElevation(last float32) (r float32) {
 	// get a nybble.
 	v := w.getNybble()
 	if v != escMarker {
-		// simple -- convert to float, add to last, and write
-		// sign extend the nybble
-		var iv int
-		if (v & 0x8) != 0 {
-			iv = int((^v + 1) & 0x7)
-			iv = 0 - iv
-		} else {
-			iv = int(v & 0x7)
-		}
-		r = last + float32(iv)
+		r = last + cvtFloatTable[v]; 
 	} else {
 		r = w.getFloat32()
 	}
